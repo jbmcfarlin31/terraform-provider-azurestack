@@ -2,12 +2,12 @@ package azurestack
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/Azure/azure-sdk-for-go/profiles/2019-03-01/compute/mgmt/compute"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
+	"log"
+	"strings"
 )
 
 func resourceArmAvailabilitySet() *schema.Resource {
@@ -48,12 +48,12 @@ func resourceArmAvailabilitySet() *schema.Resource {
 			},
 
 			// Not supported for 2017-03-09 profile
-			// "managed": {
-			// 	Type:     schema.TypeBool,
-			// 	Optional: true,
-			// 	Default:  false,
-			// 	ForceNew: true,
-			// },
+			"managed": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 
 			"tags": tagsSchema(),
 		},
@@ -73,7 +73,7 @@ func resourceArmAvailabilitySetCreate(d *schema.ResourceData, meta interface{}) 
 	faultDomainCount := d.Get("platform_fault_domain_count").(int)
 
 	// Not supported for 2017-03-09 profile
-	// managed := d.Get("managed").(bool)
+	managed := d.Get("managed").(bool)
 
 	tags := d.Get("tags").(map[string]interface{})
 
@@ -88,12 +88,12 @@ func resourceArmAvailabilitySetCreate(d *schema.ResourceData, meta interface{}) 
 	}
 
 	// Not supported for 2017-03-09 profile
-	// if managed == true {
-	// 	n := "Aligned"
-	// 	availSet.Sku = &compute.Sku{
-	// 		Name: &n,
-	// 	}
-	// }
+	if managed == true {
+		n := "Aligned"
+		availSet.Sku = &compute.Sku{
+			Name: &n,
+		}
+	}
 
 	resp, err := client.CreateOrUpdate(ctx, resGroup, name, availSet)
 	if err != nil {
@@ -135,9 +135,9 @@ func resourceArmAvailabilitySetRead(d *schema.ResourceData, meta interface{}) er
 	d.Set("platform_fault_domain_count", availSet.PlatformFaultDomainCount)
 
 	// Not supported for 2017-03-09 profile
-	// if resp.Sku != nil && resp.Sku.Name != nil {
-	// 	d.Set("managed", strings.EqualFold(*resp.Sku.Name, "Aligned"))
-	// }
+	if resp.Sku != nil && resp.Sku.Name != nil {
+		d.Set("managed", strings.EqualFold(*resp.Sku.Name, "Aligned"))
+	}
 
 	flattenAndSetTags(d, &resp.Tags)
 

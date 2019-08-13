@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform/addrs"
 
 	"github.com/hashicorp/terraform/config"
-	"github.com/hashicorp/terraform/config/hcl2shim"
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
@@ -61,7 +60,7 @@ func (n *EvalTypeCheckVariable) Eval(ctx EvalContext) (interface{}, error) {
 			continue
 		}
 
-		if proposedValue == hcl2shim.UnknownVariableValue {
+		if proposedValue == config.UnknownVariableValue {
 			continue
 		}
 
